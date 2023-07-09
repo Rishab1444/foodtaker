@@ -1,6 +1,6 @@
-# Self Onboarding Restaurant Portal
+# Self Onboarding Restaurant Portal -FoodTaker
 
-The Self Onboarding Restaurant Portal is a web application developed for a food delivery company. It allows restaurants to independently register and set up their accounts on the platform.
+FoodTaker is a web application developed for a food delivery company. It allows restaurants to independently register and set up their accounts on the platform.
 
 ## Tech Stack
 
