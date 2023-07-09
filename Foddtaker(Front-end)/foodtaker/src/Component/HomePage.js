@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import "../style/Home.css";
 import styled from "styled-components";
-import { Button, Checkbox, Form, Input } from "antd";
+
 
 const Navbar = styled.div`
 height: 100px;
