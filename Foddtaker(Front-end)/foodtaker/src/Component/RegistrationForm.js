@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styled from "styled-components";
-import { Button, Checkbox, Form, Input } from "antd";
+
 
 const RegistrationForm = () => {
   const [name, setName] = useState('');
@@ -15,7 +15,7 @@ const RegistrationForm = () => {
   const [avgTransaction, setavgTransaction] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    // e.preventDefault();
 
     const newUser = {
       name,
@@ -30,7 +30,7 @@ const RegistrationForm = () => {
     };
 
     try {
-      const response = await axios.post('proxy/merchant', newUser);
+      const response = await axios.post('http://localhost:8080/merchant', newUser, { withCredentials: true });
       console.log('User registered:', response.data);
       // Reset form values
       setName('');
