@@ -13,6 +13,10 @@ public class MerchantUpdateRequest {
 
     private  String ownerName;
 
+    private  String Email;
+
+    private  String password;
+
     private String pincode;
 
     private String location;

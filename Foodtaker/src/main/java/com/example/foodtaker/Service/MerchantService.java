@@ -7,6 +7,8 @@ import com.example.foodtaker.Model.Response.MerchantResponse;
 import com.example.foodtaker.Repository.MerchantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +46,7 @@ public class MerchantService {
      * Deleting  the detail of the restaurent
      * @param id
      */
-    public void deleteDetails(String id){
+    public MerchantResponse deleteDetails(String id){
         MerchantResponse merchantResponse = new MerchantResponse();
         if(merchantRepository.findById(Integer.parseInt(id))!=null){
             merchantRepository.deleteById(Integer.parseInt(id));
@@ -52,13 +54,14 @@ public class MerchantService {
         } else{
             merchantResponse.setStatus("Restaurent information not found");
         }
+        return  merchantResponse;
     }
 
     /**
      * Updating Restaurent details
      * @param merchantUpdateRequest
      */
-    public void updateDetails(MerchantUpdateRequest merchantUpdateRequest){
+    public MerchantResponse updateDetails(MerchantUpdateRequest merchantUpdateRequest){
 
         MerchantDetail restaurentInfoUpdate = merchantRepository.findById(Integer.parseInt(merchantUpdateRequest.getId())).get();
         if(restaurentInfoUpdate.getId() == Integer.parseInt(merchantUpdateRequest.getId())) {
@@ -79,19 +82,30 @@ public class MerchantService {
             restaurentInfoUpdate.setLocation(merchantUpdateRequest.getLocation() == null
                     || merchantUpdateRequest.getLocation().equals("") ? restaurentInfoUpdate.getLocation() : merchantUpdateRequest.getLocation());
 
-            restaurentInfoUpdate.setRating(merchantUpdateRequest.getAvgTransaction() == restaurentInfoUpdate.getAvgTransaction() ? restaurentInfoUpdate.getRating() : getRating(merchantUpdateRequest.getAvgTransaction()));
+            restaurentInfoUpdate.setEmail(merchantUpdateRequest.getEmail() == null
+                    || merchantUpdateRequest.getEmail().equals("") ? restaurentInfoUpdate.getEmail() : merchantUpdateRequest.getEmail());
 
+
+            restaurentInfoUpdate.setPassword(merchantUpdateRequest.getPassword() == null
+                    || merchantUpdateRequest.getPassword().equals("") ? restaurentInfoUpdate.getPassword() : merchantUpdateRequest.getPassword());
+
+            if(merchantUpdateRequest.getAvgTransaction() != null && restaurentInfoUpdate.getAvgTransaction() != merchantUpdateRequest.getAvgTransaction()){
+                restaurentInfoUpdate.setRating(getRating(merchantUpdateRequest.getAvgTransaction()));
+            }
             restaurentInfoUpdate.setAvgTransaction((merchantUpdateRequest.getAvgTransaction() ==null ? restaurentInfoUpdate.getAvgTransaction() : merchantUpdateRequest.getAvgTransaction()));
+
+
 
             merchantRepository.save(restaurentInfoUpdate);
             MerchantResponse merchantResponse = new MerchantResponse();
             merchantResponse.setStatus("Restaurent info updated Succesfully");
+            return  merchantResponse;
         }
         else {
             MerchantResponse merchantResponse = new MerchantResponse();
             merchantResponse.setStatus("Restaurent not found");
+           return merchantResponse;
         }
-
     }
     public List<MerchantDetail> allRestaurentDetail(){
         List allRestaurentInfo = merchantRepository.findAll();
@@ -118,12 +132,57 @@ public class MerchantService {
     }
 
     public  List<MerchantDetail> isValidUser(String email,String password){
-        MerchantDetail loginDetail = (MerchantDetail) merchantRepository.findByEmail(email);
-        if(email =="admin" && loginDetail.getPassword().equals(password)) {
+        MerchantDetail loginDetail = merchantRepository.findByEmail(email).get(0);
+        if(email.equals("admin@foodtaker.com") && loginDetail.getPassword().equals(password)) {
             return allRestaurentDetail();
         }
             Optional userDetail = merchantRepository.findById(loginDetail.getId());
             return  userDetail.stream().toList();
     }
+    public void validatePayload(MerchantRequest payload, BindingResult result) {
+        // Validate restaurant name
+        if (payload.getName() == null || payload.getName().isEmpty()) {
+            result.addError(new FieldError("payload", "restaurantName", "Restaurant name is required."));
+        }
+
+        // Validate phone number
+        if (payload.getPhoneNumber() == null || payload.getPhoneNumber().isEmpty()) {
+            result.addError(new FieldError("payload", "phoneNumber", "Phone number is required."));
+        } else {
+            // Additional phone number validation logic if needed
+        }
+
+        // Validate email
+        if (payload.getEmail() == null || payload.getEmail().isEmpty()) {
+            result.addError(new FieldError("payload", "email", "Email is required."));
+        } else if (!isValidEmail(payload.getEmail())) {
+            result.addError(new FieldError("payload", "email", "Invalid email format."));
+        }
+
+        // Validate password
+        if (payload.getPassword() == null || payload.getPassword().isEmpty()) {
+            result.addError(new FieldError("payload", "password", "Password is required."));
+        } else {
+            // Additional password validation logic if needed
+        }
+
+        // Validate location
+        if (payload.getLocation() == null || payload.getLocation().isEmpty()) {
+            result.addError(new FieldError("payload", "location", "Location is required."));
+        }
+
+        // Validate pin code
+        if (payload.getPincode() == null || payload.getPincode().isEmpty()) {
+            result.addError(new FieldError("payload", "pincode", "Pin code is required."));
+        } else {
+            // Additional pin code validation logic if needed
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        String regex = "^[\\w.-]+@[a-zA-Z_-]+?(?:\\.[a-zA-Z]{2,6})+$";
+        return email.matches(regex);
+    }
+
 }
 
